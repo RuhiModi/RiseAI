@@ -194,6 +194,13 @@
         <input value="Loaded from Google Sheet" disabled />
       </div>
     </div>
+    
+    <div class="card">
+  <h2>Numbers to be Called</h2>
+  <div id="numberPreview" style="font-size:14px;color:#6b7280;">
+    Loading…
+  </div>
+</div>
 
     <button class="btn" id="launchBtn" onclick="launchCampaign()">
       Launch AI Calls
@@ -215,11 +222,44 @@
         <tr>
           <td colspan="3" style="color:#6b7280;">No campaign started</td>
         </tr>
+        
       </tbody>
     </table>
   </div>
 
 </div>
+
+
+  <script>
+async function loadPreview() {
+  try {
+    const res = await fetch(
+      "https://exotel-voice-agent.onrender.com/preview-bulk"
+    );
+    const data = await res.json();
+
+    const el = document.getElementById("numberPreview");
+    if (!data.total) {
+      el.innerText = "No numbers found.";
+      return;
+    }
+
+    el.innerHTML = `
+      <div>Total Numbers: <b>${data.total}</b></div>
+      <ul>
+        ${data.preview.map(n =>
+          `<li>${n.phone.replace(/(\d{4})\d+(\d{2})/, "$1XXXX$2")} – ${n.status}</li>`
+        ).join("")}
+      </ul>
+    `;
+  } catch {
+    document.getElementById("numberPreview").innerText =
+      "Unable to load numbers.";
+  }
+}
+
+loadPreview();
+</script>
 
 <script>
 async function launchCampaign() {
