@@ -30,7 +30,6 @@
       min-height: 100vh;
     }
 
-    /* ================= SIDEBAR ================= */
     .sidebar {
       width: 240px;
       background: var(--sidebar);
@@ -70,7 +69,6 @@
       font-weight: 600;
     }
 
-    /* ================= MAIN ================= */
     .main {
       flex: 1;
       padding: 24px;
@@ -99,11 +97,6 @@
       padding: 20px;
       border: 1px solid var(--border);
       margin-bottom: 20px;
-    }
-
-    .card h2 {
-      margin: 0 0 16px;
-      font-size: 16px;
     }
 
     label {
@@ -152,11 +145,6 @@
       text-align: left;
     }
 
-    th {
-      color: var(--muted);
-      font-weight: 500;
-    }
-
     .status {
       padding: 6px 10px;
       border-radius: 999px;
@@ -167,129 +155,115 @@
     .calling { background: #dbeafe; color: #1d4ed8; }
     .completed { background: #dcfce7; color: var(--success); }
 
-    /* ================= MOBILE ================= */
     @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-      }
-
-      .sidebar {
-        width: 100%;
-        flex-direction: row;
-        overflow-x: auto;
-      }
-
-      .nav {
-        display: flex;
-        gap: 6px;
-      }
-
-      .main {
-        padding: 16px;
-      }
-
-      .row {
-        grid-template-columns: 1fr;
-      }
+      body { flex-direction: column; }
+      .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
+      .nav { display: flex; gap: 6px; }
+      .main { padding: 16px; }
+      .row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 
 <body>
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="logo">
-      RiseAI
-      <span>AI Voice Manager</span>
-    </div>
-
-    <div class="nav">
-      <a class="active">Campaigns</a>
-      <a>Live Calls</a>
-      <a>Analytics</a>
-      <a>Settings</a>
-    </div>
+<div class="sidebar">
+  <div class="logo">
+    RiseAI
+    <span>AI Voice Manager</span>
   </div>
 
-  <!-- MAIN -->
-  <div class="main">
+  <div class="nav">
+    <a class="active">Campaigns</a>
+    <a>Live Calls</a>
+    <a>Analytics</a>
+    <a>Settings</a>
+  </div>
+</div>
 
-    <div class="header">
-      <h1>Campaigns</h1>
-      <span>Manage AI calling campaigns</span>
-    </div>
+<div class="main">
 
-    <!-- Campaign Setup -->
-    <div class="card">
-      <h2>Create Campaign</h2>
+  <div class="header">
+    <h1>Campaigns</h1>
+    <span>Manage AI calling campaigns</span>
+  </div>
 
-      <label>Select Campaign</label>
-      <select>
-        <option>Kisan Yojana Outreach</option>
-        <option>Public Service Follow-up</option>
-        <option>Survey Campaign</option>
-      </select>
+  <div class="card">
+    <h2>Create Campaign</h2>
 
-      <div class="row">
-        <div>
-          <label>Batch ID</label>
-          <input value="BATCH_AUTO_GENERATED" disabled />
-        </div>
-        <div>
-          <label>Total Numbers</label>
-          <input value="Loaded from Google Sheet" disabled />
-        </div>
+    <label>Select Campaign</label>
+    <select>
+      <option>Kisan Yojana Outreach</option>
+      <option>Public Service Follow-up</option>
+      <option>Survey Campaign</option>
+    </select>
+
+    <div class="row">
+      <div>
+        <label>Batch ID</label>
+        <input id="batchId" disabled />
       </div>
-
-      <button class="btn" onclick="launchDemo()">Launch AI Calls</button>
+      <div>
+        <label>Total Numbers</label>
+        <input value="Loaded from Google Sheet" disabled />
+      </div>
     </div>
 
-    <!-- Status -->
-    <div class="card">
-      <h2>Campaign Status</h2>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Phone</th>
-            <th>Batch</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="status">
-          <tr>
-            <td>+91 78XXXX7762</td>
-            <td>BATCH_001</td>
-            <td><span class="status pending">Pending</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
+    <button class="btn" onclick="launchRealCalls()">Launch AI Calls</button>
   </div>
 
-  <script>
-    function launchDemo() {
-      const el = document.getElementById("status");
-      el.innerHTML = `
+  <div class="card">
+    <h2>Campaign Status</h2>
+
+    <table>
+      <thead>
         <tr>
-          <td>+91 78XXXX7762</td>
-          <td>BATCH_001</td>
-          <td><span class="status calling">Calling</span></td>
+          <th>Campaign</th>
+          <th>Batch</th>
+          <th>Status</th>
         </tr>
-      `;
+      </thead>
+      <tbody id="status"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  function launchRealCalls() {
+    const batchId = "batch_" + Date.now();
+    document.getElementById("batchId").value = batchId;
+
+    const statusEl = document.getElementById("status");
+    statusEl.innerHTML = `
+      <tr>
+        <td>Kisan Yojana Outreach</td>
+        <td>${batchId}</td>
+        <td><span class="status calling">Calling Started</span></td>
+      </tr>
+    `;
+
+    fetch("https://exotel-voice-agent.onrender.com/bulk-call", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ batchId })
+    })
+    .then(() => {
       setTimeout(() => {
-        el.innerHTML = `
+        statusEl.innerHTML = `
           <tr>
-            <td>+91 78XXXX7762</td>
-            <td>BATCH_001</td>
-            <td><span class="status completed">Completed</span></td>
+            <td>Kisan Yojana Outreach</td>
+            <td>${batchId}</td>
+            <td><span class="status completed">Triggered</span></td>
           </tr>
         `;
-      }, 2000);
-    }
-  </script>
+      }, 1500);
+    })
+    .catch(() => {
+      alert("Failed to start calls. Please try again.");
+    });
+  }
+</script>
 
 </body>
 </html>
