@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>RiseAI – AI Voice Campaign Manager</title>
+  <title>RiseAI – AI Voice Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     :root {
       --primary: #0a66c2;
-      --bg: #f5f7fb;
+      --bg: #f4f6fb;
+      --sidebar: #ffffff;
       --card: #ffffff;
       --text: #1f2937;
       --muted: #6b7280;
+      --border: #e5e7eb;
       --success: #16a34a;
     }
 
@@ -24,52 +26,90 @@
       margin: 0;
       background: var(--bg);
       color: var(--text);
-    }
-
-    header {
-      background: #fff;
-      padding: 16px 20px;
-      border-bottom: 1px solid #e5e7eb;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      min-height: 100vh;
     }
 
-    header h1 {
+    /* ================= SIDEBAR ================= */
+    .sidebar {
+      width: 240px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo {
       font-size: 18px;
-      margin: 0;
+      font-weight: 700;
+      margin-bottom: 30px;
+    }
+
+    .logo span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .nav a {
+      display: block;
+      padding: 12px 14px;
+      margin-bottom: 6px;
+      text-decoration: none;
+      color: var(--text);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .nav a.active,
+    .nav a:hover {
+      background: #eef4ff;
+      color: var(--primary);
       font-weight: 600;
     }
 
-    header span {
-      font-size: 13px;
-      color: var(--muted);
+    /* ================= MAIN ================= */
+    .main {
+      flex: 1;
+      padding: 24px;
     }
 
-    .container {
-      padding: 20px;
-      max-width: 900px;
-      margin: auto;
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .header span {
+      font-size: 13px;
+      color: var(--muted);
     }
 
     .card {
       background: var(--card);
       border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
       margin-bottom: 20px;
     }
 
     .card h2 {
       margin: 0 0 16px;
       font-size: 16px;
-      font-weight: 600;
     }
 
     label {
-      display: block;
       font-size: 13px;
       color: var(--muted);
+      display: block;
       margin-bottom: 6px;
     }
 
@@ -77,9 +117,9 @@
       width: 100%;
       padding: 12px;
       border-radius: 8px;
-      border: 1px solid #d1d5db;
-      font-size: 14px;
+      border: 1px solid var(--border);
       margin-bottom: 16px;
+      font-size: 14px;
     }
 
     .row {
@@ -89,19 +129,15 @@
     }
 
     .btn {
-      width: 100%;
+      background: var(--primary);
+      color: white;
       padding: 14px;
       border-radius: 10px;
       border: none;
-      background: var(--primary);
-      color: #fff;
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-    }
-
-    .btn:active {
-      transform: scale(0.98);
+      width: 100%;
     }
 
     table {
@@ -110,13 +146,13 @@
       font-size: 14px;
     }
 
-    table th, table td {
+    th, td {
       padding: 12px;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid var(--border);
       text-align: left;
     }
 
-    table th {
+    th {
       color: var(--muted);
       font-weight: 500;
     }
@@ -125,32 +161,33 @@
       padding: 6px 10px;
       border-radius: 999px;
       font-size: 12px;
-      display: inline-block;
     }
 
-    .pending {
-      background: #e5e7eb;
-      color: #374151;
-    }
+    .pending { background: #e5e7eb; }
+    .calling { background: #dbeafe; color: #1d4ed8; }
+    .completed { background: #dcfce7; color: var(--success); }
 
-    .calling {
-      background: #dbeafe;
-      color: #1d4ed8;
-    }
+    /* ================= MOBILE ================= */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
 
-    .completed {
-      background: #dcfce7;
-      color: var(--success);
-    }
+      .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+      }
 
-    footer {
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted);
-      padding: 20px 0;
-    }
+      .nav {
+        display: flex;
+        gap: 6px;
+      }
 
-    @media (max-width: 640px) {
+      .main {
+        padding: 16px;
+      }
+
       .row {
         grid-template-columns: 1fr;
       }
@@ -160,88 +197,99 @@
 
 <body>
 
-<header>
-  <h1>RiseAI</h1>
-  <span>AI Voice Campaign Manager</span>
-</header>
-
-<div class="container">
-
-  <!-- Campaign Setup -->
-  <div class="card">
-    <h2>Campaign Setup</h2>
-
-    <label>Select Campaign</label>
-    <select>
-      <option>Kisan Yojana Outreach</option>
-      <option>Public Service Follow-up</option>
-      <option>Survey Campaign</option>
-    </select>
-
-    <div class="row">
-      <div>
-        <label>Auto Batch ID</label>
-        <input type="text" value="BATCH_{{AUTO_GENERATED}}" disabled />
-      </div>
-      <div>
-        <label>Total Numbers</label>
-        <input type="text" value="Loaded from Google Sheet" disabled />
-      </div>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="logo">
+      RiseAI
+      <span>AI Voice Manager</span>
     </div>
 
-    <button class="btn" onclick="launchDemo()">Launch AI Calls</button>
+    <div class="nav">
+      <a class="active">Campaigns</a>
+      <a>Live Calls</a>
+      <a>Analytics</a>
+      <a>Settings</a>
+    </div>
   </div>
 
-  <!-- Live Campaign Status -->
-  <div class="card">
-    <h2>Campaign Status</h2>
+  <!-- MAIN -->
+  <div class="main">
 
-    <table>
-      <thead>
-        <tr>
-          <th>Phone</th>
-          <th>Batch ID</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="statusTable">
+    <div class="header">
+      <h1>Campaigns</h1>
+      <span>Manage AI calling campaigns</span>
+    </div>
+
+    <!-- Campaign Setup -->
+    <div class="card">
+      <h2>Create Campaign</h2>
+
+      <label>Select Campaign</label>
+      <select>
+        <option>Kisan Yojana Outreach</option>
+        <option>Public Service Follow-up</option>
+        <option>Survey Campaign</option>
+      </select>
+
+      <div class="row">
+        <div>
+          <label>Batch ID</label>
+          <input value="BATCH_AUTO_GENERATED" disabled />
+        </div>
+        <div>
+          <label>Total Numbers</label>
+          <input value="Loaded from Google Sheet" disabled />
+        </div>
+      </div>
+
+      <button class="btn" onclick="launchDemo()">Launch AI Calls</button>
+    </div>
+
+    <!-- Status -->
+    <div class="card">
+      <h2>Campaign Status</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Phone</th>
+            <th>Batch</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="status">
+          <tr>
+            <td>+91 78XXXX7762</td>
+            <td>BATCH_001</td>
+            <td><span class="status pending">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script>
+    function launchDemo() {
+      const el = document.getElementById("status");
+      el.innerHTML = `
         <tr>
           <td>+91 78XXXX7762</td>
           <td>BATCH_001</td>
-          <td><span class="status pending">Pending</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-</div>
-
-<footer>
-  © 2026 RiseAI · Internal Demo
-</footer>
-
-<script>
-  function launchDemo() {
-    const table = document.getElementById("statusTable");
-    table.innerHTML = `
-      <tr>
-        <td>+91 78XXXX7762</td>
-        <td>BATCH_001</td>
-        <td><span class="status calling">Calling</span></td>
-      </tr>
-    `;
-
-    setTimeout(() => {
-      table.innerHTML = `
-        <tr>
-          <td>+91 78XXXX7762</td>
-          <td>BATCH_001</td>
-          <td><span class="status completed">Completed</span></td>
+          <td><span class="status calling">Calling</span></td>
         </tr>
       `;
-    }, 2000);
-  }
-</script>
+      setTimeout(() => {
+        el.innerHTML = `
+          <tr>
+            <td>+91 78XXXX7762</td>
+            <td>BATCH_001</td>
+            <td><span class="status completed">Completed</span></td>
+          </tr>
+        `;
+      }, 2000);
+    }
+  </script>
 
 </body>
 </html>
