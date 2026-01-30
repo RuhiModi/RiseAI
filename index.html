@@ -35,6 +35,8 @@
       background: var(--sidebar);
       border-right: 1px solid var(--border);
       padding: 20px;
+      display: flex;
+      flex-direction: column;
     }
 
     .logo {
@@ -47,18 +49,21 @@
       display: block;
       font-size: 12px;
       color: var(--muted);
+      font-weight: 500;
     }
 
     .nav a {
       display: block;
-      padding: 12px;
+      padding: 12px 14px;
       margin-bottom: 6px;
-      border-radius: 8px;
       text-decoration: none;
       color: var(--text);
+      border-radius: 8px;
+      font-size: 14px;
     }
 
-    .nav a.active {
+    .nav a.active,
+    .nav a:hover {
       background: #eef4ff;
       color: var(--primary);
       font-weight: 600;
@@ -67,6 +72,13 @@
     .main {
       flex: 1;
       padding: 24px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
     }
 
     .card {
@@ -90,6 +102,7 @@
       border-radius: 8px;
       border: 1px solid var(--border);
       margin-bottom: 16px;
+      font-size: 14px;
     }
 
     .btn {
@@ -104,35 +117,32 @@
       width: 100%;
     }
 
-    table {
+    .iframe-wrap {
+      display: none;
+      margin-top: 20px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    iframe {
       width: 100%;
-      border-collapse: collapse;
+      height: 700px;
+      border: none;
     }
-
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-    }
-
-    .status {
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-    }
-
-    .calling { background: #dbeafe; color: #1d4ed8; }
-    .completed { background: #dcfce7; color: var(--success); }
 
     @media (max-width: 768px) {
       body { flex-direction: column; }
-      .sidebar { width: 100%; }
+      .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
+      .nav { display: flex; gap: 6px; }
+      .main { padding: 16px; }
     }
   </style>
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
   <div class="logo">
     RiseAI
@@ -146,84 +156,42 @@
   </div>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
+  <div class="header">
+    <h1>Campaigns</h1>
+    <span>Manage AI calling campaigns</span>
+  </div>
+
+  <!-- Campaign Setup -->
   <div class="card">
     <h2>Create Campaign</h2>
 
     <label>Select Campaign</label>
-    <select id="campaign">
-      <option value="mla">MLA Follow-up Campaign</option>
-      <option value="driver">Driver Feedback Campaign</option>
+    <select>
+      <option>MLA Follow-up Campaign</option>
+      <option disabled>Driver Feedback Campaign (Coming Soon)</option>
     </select>
 
-    <label>Batch ID</label>
-    <input id="batchId" disabled />
+    <button class="btn" onclick="showForm()">Launch AI Calls</button>
 
-    <button class="btn" onclick="launchCalls()">Launch AI Calls</button>
-  </div>
-
-  <div class="card">
-    <h2>Campaign Status</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Campaign</th>
-          <th>Batch</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="status"></tbody>
-    </table>
+    <!-- ✅ GOOGLE FORM EMBED -->
+    <div class="iframe-wrap" id="formBox">
+      <iframe
+        src="https://docs.google.com/forms/d/e/1FAIpQLScekyLgoQ8SF6cwcbpnwD3Ld3GuaMr21C6DDgMlKFnAW2_o7w/viewform?embedded=true">
+      </iframe>
+    </div>
+    
   </div>
 
 </div>
 
 <script>
-function launchCalls() {
-  const campaign = document.getElementById("campaign").value;
-
-  if (campaign !== "mla") {
-    alert("This campaign is not active yet.");
-    return;
+  function showForm() {
+    document.getElementById("formBox").style.display = "block";
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
   }
-
-  const batchId = "BATCH_" + Date.now();
-  document.getElementById("batchId").value = batchId;
-
-  const statusEl = document.getElementById("status");
-  statusEl.innerHTML = `
-    <tr>
-      <td>MLA Follow-up Campaign</td>
-      <td>${batchId}</td>
-      <td><span class="status calling">Calling Started</span></td>
-    </tr>
-  `;
-
-  fetch("https://exotel-voice-agent.onrender.com/bulk-call", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      batchId: batchId,
-      phones: ["DUMMY"]
-    })
-  })
-  .then(res => {
-    if (!res.ok) throw new Error();
-    setTimeout(() => {
-      statusEl.innerHTML = `
-        <tr>
-          <td>MLA Follow-up Campaign</td>
-          <td>${batchId}</td>
-          <td><span class="status completed">Triggered</span></td>
-        </tr>
-      `;
-    }, 1500);
-  })
-  .catch(() => {
-    alert("Failed to start calls. Please try again.");
-  });
-}
 </script>
 
 </body>
