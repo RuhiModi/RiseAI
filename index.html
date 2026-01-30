@@ -1,1 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Voice Campaign Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f7f9fc;
+      color: #1f2937;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .status-pill {
+      background: #e6f7ef;
+      color: #0f766e;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .hero h1 {
+      font-size: 32px;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .hero p {
+      font-size: 16px;
+      color: #4b5563;
+      margin-top: 12px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+      margin-bottom: 24px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .field {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #eef2f7;
+      font-size: 14px;
+    }
+
+    .field:last-child {
+      border-bottom: none;
+    }
+
+    .field span {
+      color: #6b7280;
+    }
+
+    .cta {
+      text-align: center;
+      margin-top: 32px;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 16px 28px;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #065f46;
+      font-weight: 500;
+    }
+
+    .footer-note {
+      margin-top: 48px;
+      font-size: 13px;
+      color: #6b7280;
+      text-align: center;
+    }
+
+    @media (min-width: 768px) {
+      .hero {
+        grid-template-columns: 1.3fr 1fr;
+        align-items: center;
+      }
+
+      button {
+        width: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <header>
+      <div class="logo">AI Voice Campaign</div>
+      <div class="status-pill">Engine Active</div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div>
+        <h1>Launch AI-powered voice campaigns in minutes</h1>
+        <p>
+          Automatically call citizens in Gujarati using a human-like AI voice.
+          Handles busy responses, callbacks, and stores all interactions securely.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>System Capabilities</h2>
+        <div class="field"><span>Language</span><strong>Gujarati</strong></div>
+        <div class="field"><span>Call Type</span><strong>Bulk Voice Calls</strong></div>
+        <div class="field"><span>Voice Engine</span><strong>AI Neural TTS</strong></div>
+        <div class="field"><span>Call Handling</span><strong>Automated</strong></div>
+      </div>
+    </section>
+
+    <!-- CAMPAIGN CONFIG -->
+    <section class="card">
+      <h2>Campaign Configuration</h2>
+
+      <div class="field">
+        <span>Campaign Name</span>
+        <strong>Citizen Outreach</strong>
+      </div>
+
+      <div class="field">
+        <span>Language</span>
+        <strong>Gujarati</strong>
+      </div>
+
+      <div class="field">
+        <span>Campaign Type</span>
+        <strong>Bulk Calling</strong>
+      </div>
+
+      <div class="field">
+        <span>Status</span>
+        <strong>Ready</strong>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta">
+      <button id="startBtn" onclick="startCampaign()">
+        🚀 Start Calling Campaign
+      </button>
+
+      <div class="message" id="message"></div>
+    </div>
+
+    <!-- FOOTER NOTE -->
+    <div class="footer-note">
+      This system is in controlled rollout. Live analytics and dashboards are part of V2.
+    </div>
+
+  </div>
+
+  <script>
+    const BACKEND_URL = "https://exotel-voice-agent.onrender.com/bulk-call";
+
+    function startCampaign() {
+      const btn = document.getElementById("startBtn");
+      const msg = document.getElementById("message");
+
+      btn.disabled = true;
+      msg.textContent = "⏳ Campaign started. Calls are being placed...";
+
+      const batchId = "batch_" + Date.now();
+
+      fetch(BACKEND_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          batchId: batchId
+          // Phones are already handled by backend (Google Sheet)
+        })
+      })
+      .then(() => {
+        msg.textContent = "✅ Campaign running successfully.";
+      })
+      .catch(() => {
+        msg.textContent = "⚠️ Unable to start campaign. Please try again.";
+        btn.disabled = false;
+      });
+    }
+  </script>
+
+</body>
+</html>
