@@ -15,6 +15,7 @@
       --muted: #6b7280;
       --border: #e5e7eb;
       --success: #16a34a;
+      --warning: #f59e0b;
     }
 
     * {
@@ -30,13 +31,12 @@
       min-height: 100vh;
     }
 
+    /* SIDEBAR */
     .sidebar {
       width: 240px;
       background: var(--sidebar);
       border-right: 1px solid var(--border);
       padding: 20px;
-      display: flex;
-      flex-direction: column;
     }
 
     .logo {
@@ -49,7 +49,6 @@
       display: block;
       font-size: 12px;
       color: var(--muted);
-      font-weight: 500;
     }
 
     .nav a {
@@ -69,16 +68,24 @@
       font-weight: 600;
     }
 
+    /* MAIN */
     .main {
       flex: 1;
       padding: 24px;
     }
 
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .header span {
+      font-size: 13px;
+      color: var(--muted);
     }
 
     .card {
@@ -92,8 +99,8 @@
     label {
       font-size: 13px;
       color: var(--muted);
-      display: block;
       margin-bottom: 6px;
+      display: block;
     }
 
     select, input {
@@ -103,6 +110,12 @@
       border: 1px solid var(--border);
       margin-bottom: 16px;
       font-size: 14px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
     }
 
     .btn {
@@ -117,25 +130,36 @@
       width: 100%;
     }
 
-    .iframe-wrap {
-      display: none;
-      margin-top: 20px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
+    .btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
     }
 
-    iframe {
+    table {
       width: 100%;
-      height: 700px;
-      border: none;
+      border-collapse: collapse;
+      font-size: 14px;
     }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .status {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .calling { background: #dbeafe; color: #1d4ed8; }
+    .completed { background: #dcfce7; color: var(--success); }
+    .error { background: #fee2e2; color: #b91c1c; }
 
     @media (max-width: 768px) {
       body { flex-direction: column; }
-      .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
-      .nav { display: flex; gap: 6px; }
-      .main { padding: 16px; }
+      .sidebar { width: 100%; }
+      .row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -148,6 +172,7 @@
     RiseAI
     <span>AI Voice Manager</span>
   </div>
+
   <div class="nav">
     <a class="active">Campaigns</a>
     <a>Live Calls</a>
@@ -161,36 +186,108 @@
 
   <div class="header">
     <h1>Campaigns</h1>
-    <span>Manage AI calling campaigns</span>
+    <span>Launch AI voice calling campaigns</span>
   </div>
 
-  <!-- Campaign Setup -->
   <div class="card">
     <h2>Create Campaign</h2>
 
     <label>Select Campaign</label>
-    <select>
-      <option>MLA Follow-up Campaign</option>
-      <option disabled>Driver Feedback Campaign (Coming Soon)</option>
+    <select id="campaign">
+      <option value="mla">MLA Follow-up Campaign</option>
+      <option value="driver">Driver Feedback Campaign (Coming Soon)</option>
     </select>
 
-    <button class="btn" onclick="showForm()">Launch AI Calls</button>
-
-    <!-- ✅ GOOGLE FORM EMBED -->
-    <div class="iframe-wrap" id="formBox">
-      <iframe
-        src="https://docs.google.com/forms/d/e/1FAIpQLScekyLgoQ8SF6cwcbpnwD3Ld3GuaMr21C6DDgMlKFnAW2_o7w/viewform?embedded=true">
-      </iframe>
+    <div class="row">
+      <div>
+        <label>Batch ID</label>
+        <input id="batchId" disabled placeholder="Auto-generated" />
+      </div>
+      <div>
+        <label>Total Numbers</label>
+        <input value="Loaded from Google Sheet" disabled />
+      </div>
     </div>
-    
+
+    <button class="btn" id="launchBtn" onclick="launchCampaign()">
+      Launch AI Calls
+    </button>
+  </div>
+
+  <div class="card">
+    <h2>Campaign Status</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Campaign</th>
+          <th>Batch ID</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="statusBody">
+        <tr>
+          <td colspan="3" style="color:#6b7280;">No campaign started</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
 </div>
 
 <script>
-  function showForm() {
-    document.getElementById("formBox").style.display = "block";
-    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+  async function launchCampaign() {
+    const campaign = document.getElementById("campaign").value;
+    const btn = document.getElementById("launchBtn");
+    const statusBody = document.getElementById("statusBody");
+
+    if (campaign !== "mla") {
+      alert("This campaign is not enabled yet.");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Starting Calls...";
+
+    statusBody.innerHTML = `
+      <tr>
+        <td>MLA Follow-up Campaign</td>
+        <td>Generating...</td>
+        <td><span class="status calling">Starting</span></td>
+      </tr>
+    `;
+
+    try {
+      const res = await fetch(
+        "https://exotel-voice-agent.onrender.com/start-campaign",
+        { method: "POST" }
+      );
+
+      const data = await res.json();
+
+      if (!data.success) throw new Error();
+
+      document.getElementById("batchId").value = data.batchId;
+
+      statusBody.innerHTML = `
+        <tr>
+          <td>MLA Follow-up Campaign</td>
+          <td>${data.batchId}</td>
+          <td><span class="status completed">Calls Triggered</span></td>
+        </tr>
+      `;
+    } catch (e) {
+      statusBody.innerHTML = `
+        <tr>
+          <td colspan="3">
+            <span class="status error">Failed to start calls</span>
+          </td>
+        </tr>
+      `;
+    }
+
+    btn.disabled = false;
+    btn.innerText = "Launch AI Calls";
   }
 </script>
 
